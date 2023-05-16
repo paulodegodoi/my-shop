@@ -1,8 +1,11 @@
 import { stripe } from "@/lib/stripe"
 import { ImageContainer, ProductContainer, ProductDetails } from "@/styles/pages/product"
+import axios from "axios"
 import { GetStaticPaths, GetStaticProps } from "next"
+import Head from "next/head"
 import Image from "next/image"
 import { useRouter } from "next/router"
+import { useState } from "react"
 import Stripe from "stripe"
 
 interface ProductProps {
@@ -17,29 +20,46 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-	function handleBuy() {
-		console.log(product.defaultPriceId)
+	const [isRenderingCheckout, setIsRenderingCheckout] = useState(false)
+
+	async function handleBuyProduct() {
+		try {
+			setIsRenderingCheckout(true)
+
+			const response = await axios.post("/api/checkout", {
+				priceId: product.defaultPriceId,
+			})
+
+			const { checkoutUrl } = response.data
+
+			window.location.href = checkoutUrl
+		} catch (error) {
+			setIsRenderingCheckout(false)
+			alert("Falha ao redirecionar ao checkout!")
+		}
 	}
 
-	const { isFallback } = useRouter()
-
-	if (isFallback) {
-		return <p>Carregando...</p>
-	}
 	return (
-		<ProductContainer>
-			<ImageContainer>
-				<Image src={product.imageUrl} width={520} height={480} alt="" />
-			</ImageContainer>
-			<ProductDetails>
-				<h1>{product.name}</h1>
-				<span>{product.price}</span>
+		<>
+			<Head>
+				<title>{product.name} | My Shop</title>
+			</Head>
+			<ProductContainer>
+				<ImageContainer>
+					<Image src={product.imageUrl} width={520} height={480} alt="" />
+				</ImageContainer>
+				<ProductDetails>
+					<h1>{product.name}</h1>
+					<span>{product.price}</span>
 
-				<p>{product.description}</p>
+					<p>{product.description}</p>
 
-				<button onClick={handleBuy}>Comprar agora</button>
-			</ProductDetails>
-		</ProductContainer>
+					<button disabled={isRenderingCheckout} onClick={handleBuyProduct}>
+						Comprar agora
+					</button>
+				</ProductDetails>
+			</ProductContainer>
+		</>
 	)
 }
 

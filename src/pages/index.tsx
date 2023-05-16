@@ -8,6 +8,7 @@ import { GetStaticProps } from "next"
 import Image from "next/image"
 
 import Stripe from "stripe"
+import Head from "next/head"
 
 interface HomeProps {
 	products: {
@@ -27,24 +28,29 @@ export default function Home({ products }: HomeProps) {
 	})
 
 	return (
-		<HomeContainer ref={sliderRef} className="keen-slider">
-			{products.map((p) => {
-				return (
-					<Product
-						key={p.id}
-						href={`/product/${p.id}`}
-						className="keen-slider__slide"
-						prefetch={false}
-					>
-						<Image src={p.imageUrl} width={520} height={480} alt="" />
-						<footer>
-							<strong>{p.name}</strong>
-							<span>{p.price}</span>
-						</footer>
-					</Product>
-				)
-			})}
-		</HomeContainer>
+		<>
+			<Head>
+				<title>My Shop</title>
+			</Head>
+			<HomeContainer ref={sliderRef} className="keen-slider">
+				{products.map((p) => {
+					return (
+						<Product
+							key={p.id}
+							href={`/product/${p.id}`}
+							className="keen-slider__slide"
+							prefetch={false}
+						>
+							<Image src={p.imageUrl} width={520} height={480} alt="" />
+							<footer>
+								<strong>{p.name}</strong>
+								<span>{p.price}</span>
+							</footer>
+						</Product>
+					)
+				})}
+			</HomeContainer>
+		</>
 	)
 }
 
